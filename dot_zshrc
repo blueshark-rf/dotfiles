@@ -28,6 +28,8 @@ export PATH
 
 # (System paths follow automatically)
 
+export PIPX_DEFAULT_PYTHON="$(command -v python3)"
+
 # --- Environment variables
 export NET_TEXTFSM="$HOME/Library/Python/3.9/lib/python/site-packages/ntc_templates/templates"
 
@@ -137,4 +139,3 @@ dirdiff() {
 
 
 # Created by `RF` on 2025-11-05 16:46:23
-# export PATH="$PATH:/Users/fieldr/.local/bin"
