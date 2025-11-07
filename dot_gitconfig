@@ -20,6 +20,7 @@
 	fsmonitor = true
 	pager = delta
 	editor = nano
+	sshCommand = /usr/bin/ssh
 
 [color]
 	ui = true
