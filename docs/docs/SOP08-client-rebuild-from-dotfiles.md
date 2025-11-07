@@ -1,5 +1,5 @@
 # SOP08 – Client Rebuild from Dotfiles Repository
-Author: Richard Field (Italik Ltd)
+Author: Robert Field (Italik Ltd)
 
 ## Objective
 I describe a repeatable, low-touch process to rebuild a client machine from my dotfiles repository using `chezmoi`. This includes first-run bootstrap, applying config, validating the result, and handling common errors.
