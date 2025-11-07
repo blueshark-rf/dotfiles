@@ -1,0 +1,140 @@
+# ----------------------------
+# Powerlevel10k Instant Prompt
+# ----------------------------
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+# ----------------------------
+
+
+# ----------------------------
+# PATH Setup
+# ----------------------------
+
+# --- PATH (explicit order; unique entries)
+typeset -U path
+
+path=(
+  /opt/homebrew/bin
+  /opt/homebrew/sbin
+  /opt/homebrew/opt/coreutils/libexec/gnubin
+  /opt/homebrew/opt/gawk/libexec/gnubin
+  $HOME/bin(N-/)
+  $HOME/.local/bin(N-/)
+  $HOME/Library/Python/3.9/bin(N-/)
+  $path   # keep existing system paths at the end
+)
+export PATH
+
+# (System paths follow automatically)
+
+# --- Environment variables
+export NET_TEXTFSM="$HOME/Library/Python/3.9/lib/python/site-packages/ntc_templates/templates"
+
+# Path to config and golden copy - ChromaTerm
+export CT_CFG="$HOME/.chromaterm.yml"
+export CT_GOLD="$HOME/.chromaterm.yml.good"
+
+#----------------------------
+# environment variable for FS
+#----------------------------M
+
+export FSM_PATH="$HOME/etc"
+
+# ----------------------------
+# Oh My Zsh Setup
+# ----------------------------
+
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+plugins=(
+  git
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+  web-search
+)
+
+source "$ZSH/oh-my-zsh.sh"
+
+# ----------------------------
+# Aliases and Colour Support
+# ----------------------------
+
+# Enable full-colour output using GNU ls
+alias ls='gls --color=auto'
+alias ll='gls -lh --color=auto'
+alias la='gls -lha --color=auto'
+alias sshc='ssh "$@" | ct'
+
+# Optional: safer file removal
+alias rm='rm -i'
+
+# Shortcuts
+alias zshconfig="nano ~/.zshrc"
+alias p10kconfig="nano ~/.p10k.zsh"
+alias ctconfig="nano ~/.chromaterm.yml"
+
+# ----------------------------
+# Prompt Configuration
+# ----------------------------
+
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+
+# ----------------------------
+# Locale / Editor / History (Optional)
+# ----------------------------
+
+# export LANG=en_GB.UTF-8
+# export EDITOR='nano'
+# HIST_STAMPS="yyyy-mm-dd"
+# export PATH="$HOME/bin:$PATH"
+
+# Save current as golden (first time, or after you’re happy with tweaks)
+ctsave() {
+  cp -v "$CT_CFG" "$CT_GOLD" && echo "✅ saved golden → $CT_GOLD"
+}
+
+# Show unified diff against golden (colours if you have 'wdiff' or 'colordiff')
+ctdiff() {
+  if [ ! -f "$CT_GOLD" ]; then echo "❌ no golden copy ($CT_GOLD). Run ctsave first."; return 1; fi
+  diff -u "$CT_GOLD" "$CT_CFG" || true
+}
+
+# Revert back to golden
+ctrevert() {
+  if [ ! -f "$CT_GOLD" ]; then echo "❌ no golden copy ($CT_GOLD). Run ctsave first."; return 1; fi
+  cp -v "$CT_GOLD" "$CT_CFG" && echo "↩︎ reverted to golden."
+}
+
+# Quick lint using PyYAML (uses your venv if present)
+check-ct() {
+  local py="${HOME}/ct-test/bin/python3"
+  [ -x "$py" ] || py="$(command -v python3)"
+  [ -x "$py" ] || { echo "⚠️  python3 not found"; return 1; }
+  "$py" - <<'PY'
+import sys, yaml, pathlib
+p = pathlib.Path().home()/'.chromaterm.yml'
+try:
+    yaml.safe_load(p.read_text())
+    print("✅ YAML OK")
+except yaml.YAMLError as e:
+    print("❌ YAML error:\n", e, file=sys.stderr); sys.exit(1)
+PY
+  if command -v ct >/dev/null; then
+    printf 'test\n' | ct >/dev/null 2>&1 && echo "✅ ct loads config" || echo "❌ ct failed to load config"
+  fi
+}
+
+# === Colour diff for arbitrary files using delta ===
+dirdiff() {
+  if [[ $# -ne 2 ]]; then
+    echo "Usage: dirdiff <file1> <file2>"
+    return 1
+  fi
+  delta --side-by-side --line-numbers "$1" "$2"
+}
+
+
+# Created by `RF` on 2025-11-05 16:46:23
+# export PATH="$PATH:/Users/fieldr/.local/bin"

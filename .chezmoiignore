@@ -1,0 +1,17 @@
+# ---- Big/volatile or third-party trees you don't want to track
+.oh-my-zsh/** 
+.zcompdump*
+**/*.zwc
+.lesshst
+
+# Company/IT-managed utilities & artefacts
+bin/**
+# (if you later want to version your own scripts in ~/bin, remove this and add selective paths)
+
+# Misc caches & app data you likely don’t want in dotfiles
+.config/wireshark/**
+.hammerspoon/**
+
+# Temporary or rotating files
+CFUserTextEncoding
+.DS_Store

@@ -1,0 +1,58 @@
+[credential]
+	helper = osxkeychain
+[user]
+	name = Robert Field
+	email = robert.field@italik.co.uk
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = false
+
+[fetch]
+	prune = true
+
+[push]
+	default = simple
+
+[core]
+	autocrlf = input
+	fsmonitor = true
+	pager = delta
+	editor = nano
+
+[color]
+	ui = true
+	status = auto
+	diff = auto
+	branch = auto
+	interactive = auto
+
+[delta]
+    navigate = true               # Allow ← / → line navigation
+    line-numbers = true
+    side-by-side = true
+    syntax-theme = OneHalfDark    # Clean green-on-black scheme
+    plus-style = "syntax #00e0d1" # Teal cyan for additions (matches your CT)
+    minus-style = "syntax #c71800" # Deep red for removals
+    whitespace-error-style = "reverse"
+    diff-so-fancy = true
+
+[merge]
+	tool = diff-so-fancy
+
+[interactive]
+	diffFilter = delta --color-only
+
+[pager]
+	diff = delta
+	log = delta
+	show = delta
+
+[alias]
+	s = status -sb
+	d = diff
+	df = diff --color-words
+	c = commit
+	a = add -p
+	l = log --oneline --graph --decorate

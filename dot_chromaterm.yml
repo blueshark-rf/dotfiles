@@ -1,0 +1,239 @@
+---
+# ==== chromaterm.yml ====
+#
+# ==== ChromaTerm Colour Legend (Green-screen tuned) ====
+# TYPES (what the token is)
+#   type-1  Peach Orange   → numbers/counters
+#   type-2  Vivid Green    → prompts (user), misc emphasis (fits CRT green)
+#   type-3  Hot Pink       → IPv6 & PUBLIC IPv4
+#   type-4  Medium Blue    → URLs & MAC addresses
+#   type-5  Amber          → dates & times
+#   type-6  Light Purple   → data sizes & rates (e.g. 10Gbps)
+#   type-7  Mint Green     → interfaces (ge-/xe-/Ethernet…)
+#   type-8  Peach          → zone names, policy names, objects (readability)
+#   type-9  Soft Purple    → protocol names (tcp/udp/ospf/…)
+#   type-10 White          → RFC1918/private IPv4 (bold)
+#
+# STATUS (what the state implies)
+#   status-1 Deep Red      → CRITICAL / Down / Deny / Reject (errors)
+#   status-2 Burnt Orange  → Severe warning / major degradation
+#   status-3 Dark Yellow   → Warning / “any/0.0.0.0/0” broad matches
+#   status-4 Mustard       → Notice / informational / transitional
+#   status-5 Lime          → Neutral-positive / non-urgent success
+#   status-6 Olive         → Good / normal operation
+#   status-7 Teal Cyan     → Optimal / Up / Permit / Established
+#
+# RULE MAPPING QUICK HINTS
+#   Permit/allow keywords     → f.status-7 bold (teal)
+#   Deny/block keywords       → f.status-1 bold (red)
+#   Interfaces (Junos/Cisco)  → f.type-7 bold (mint)
+#   Zones / policy names      → f.type-8 (amber)
+#   Public IPv4 & all IPv6    → f.type-3 (hot pink)
+#   Private IPv4 (RFC1918)    → f.type-10 bold (white)
+#   Dates / times / sizes     → f.type-5 / f.type-6 bold
+#
+palette:
+  # ==== TYPE COLOURS (what is being highlighted) ====
+  type-1:  '#dc8968'  # Peach Orange — numbers/counters
+  type-2:  '#28c501'  # Vivid Green - 
+  type-3:  '#ef2e9f'  # Hot Pink — IPv6 and public IPv4 addresses
+  type-4:  '#5698c8'  # Medium Blue — URLs & MAC addresses
+  type-5:  '#d7a94b'  # Terminal amber — dates & times
+  # type-5:  '#a35a00'  # Dark Brown — dates & times  #
+  type-6:  '#df99f0'  # Light Purple — data sizes & rates
+  type-7:  '#03d28d'  # Mint Green — network interfaces
+  type-8:  '#ffb347'  # Peach — ports/services
+  type-9:  '#b19cd9'  # Soft Purple — protocols
+  type-10: '#ffffff'  # White — RFC1918/private IPv4 (used with bold)
+
+  # ==== STATUS COLOURS (what the line/state implies) ====
+  status-1: '#c71800' # Deep Red — Critical / Down / Deny / Rejected / Panic (Immediate action)
+  status-2: '#c96901' # Burnt Orange — Severe Warning / Major Degradation (Investigate urgently)
+  status-3: '#ca9102' # Dark Yellow — Warning / Caution / Broad matches like "any" (Review)
+  status-4: '#cab902' # Mustard — Notice / Info / Transitional state (Monitor)
+  status-5: '#a2bc02' # Lime — Neutral-Positive / Okay / Non-urgent success (Low priority)
+  status-6: '#79bf02' # Olive — Good / Healthy / Normal operation (Expected)
+  status-7: '#00e0d1' # Teal Cyan — Optimal / Up / Permit / Established (All clear)
+
+rules:
+  # === PROMPTS / HEADERS ===
+  - description: Shell/Network prompt user@device>
+    regex: ^(\w+)@([A-Za-z0-9,\-]+>)
+    color:
+      1: f.type-2        
+      2: f.type-3 bold    
+
+  # === NETWORK ADDRESSES ===
+  - description: RFC1918 IPv4 (highlight distinctly)
+    regex: \b(10\.([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])|172\.(1[6-9]|2[0-9]|3[01])\.([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])|192\.168\.([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\b
+    color: f.type-10 bold
+    exclusive: true
+
+  - description: IPv4 public (and CIDR)
+    regex: \b(?<!\.)((25[0-5]|(2[0-4]|[0-1]?\d)?\d)\.){3}(25[0-5]|(2[0-4]|[0-1]?\d)?\d)(/\d{1,2})?\b
+    color: f.type-3
+    exclusive: true
+
+  - description: IPv6 (and scope/CIDR)
+    regex: |-
+      (?ix)(?<![\w:])(
+          ([\da-f]{1,4}:){7}[\da-f]{1,4}|
+          [\da-f]{1,4}:(:[\da-f]{1,4}){1,6}|
+          ([\da-f]{1,4}:){1,2}(:[\da-f]{1,4}){1,5}|
+          ([\da-f]{1,4}:){1,3}(:[\da-f]{1,4}){1,4}|
+          ([\da-f]{1,4}:){1,4}(:[\da-f]{1,4}){1,3}|
+          ([\da-f]{1,4}:){1,5}(:[\da-f]{1,4}){1,2}|
+          ([\da-f]{1,4}:){1,6}:[\da-f]{1,4}|
+          ([\da-f]{1,4}:){1,7}:|
+          :((:[\da-f]{1,4}){1,7}|:)
+      )(:(?=\W))?
+      (%[\da-z]+)?
+      (/\d+)?
+      (?!:?\w)
+    color: f.type-3
+    exclusive: true
+
+  - description: MAC address (colon/dotted)
+    regex: |-
+      (?ix)\b(
+        (?<!:)([\da-f]{1,2}:){5}[\da-f]{1,2}(?!:)|
+        (?<!\.)([\da-f]{4}\.){2}[\da-f]{4}(?!\.)
+      )\b
+    color: f.type-4
+    exclusive: true
+
+  - description: URL
+    regex: |-
+      (?ix)\b
+          ((htt|ft|lda)ps?|telnet|ssh)://
+          ([-%:\w\\/]{1,256}@)?
+          [-\w]{1,63}(\.[-\w]{1,63}){0,126}(:\d{1,5})?
+          (/[-+=~@%&?#.:;,\w\\/()]*)?
+      ((?=[.:;,)])|\b)
+    color: f.type-4
+    exclusive: true
+
+  # === DATES / TIMES / SIZES ===
+  - description: Date
+    regex: |-
+      (?ix)\b(
+          (\d{2}|\d{4})(?P<sep1>[-/])(0?[1-9]|1[0-2])(?P=sep1)(3[0-1]|[1-2]\d|0?[1-9])|
+          (3[0-1]|[1-2]\d|0?[1-9])(?P<sep2>[-/])(0?[1-9]|1[0-2])(?P=sep2)(\d{2}|\d{4})|
+          (0?[1-9]|1[0-2])(?P<sep3>[-/])(3[0-1]|[1-2]\d|0?[1-9])(?P=sep3)(\d{2}|\d{4})|
+          (jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(
+              (3[0-1]|[1-2]\d|0?[1-9])(\s+\d{4})?|\d{4}
+          )|(3[0-1]|[1-2]\d|0?[1-9])\s(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(?!\s+(3[0-1]|[1-2]\d|0?[1-9])([^\w:]|$))(\s+\d{4})?
+      )((?=[\WT_])|$)
+    color: f.type-5
+    exclusive: true
+
+  - description: Time
+    regex: |-
+      (?ix)(?<![\.:])(\b|(?<=T))
+          (2[0-3]|[0-1]\d):[0-5]\d
+          (:[0-5]\d([\.,]\d{3,6})?)?
+          ([\-\+](\d{2}|\d{4})|Z)?
+      (?![\.:])\b
+    color: f.type-5
+    exclusive: true
+
+  - description: Data sizes / rates
+    regex: (?i)\b\d+(\.\d+)?\s?((([KMGTPEZY](i?B)?)|B)(ps)?)\b
+    color: f.type-6 bold
+    exclusive: true
+
+  # === INTERFACES ===
+  - description: Juniper interfaces
+    regex: \b(ge|xe|et|ae|lo|fxp|em|me|vme|ms|gr|ip|lsq|lt|mt|sp|vlan|irb|reth|st0)[-\.]?\d+(?:/\d+)*(?:\.\d+)?
+    color: f.type-7 bold
+
+  - description: Cisco/Arista interfaces
+    regex: |-
+      (?ix)\b(
+        (?:Gigabit|Fast|Ten|Forty|Hundred)?Ethernet\d+(?:/\d+)*(?:\.\d+)?|
+        Gi\d+(?:/\d+)*(?:\.\d+)?|Fa\d+(?:/\d+)*(?:\.\d+)?|
+        Te\d+(?:/\d+)*(?:\.\d+)?|Et\d+(?:/\d+)*(?:\.\d+)?|
+        Vlan\d+|Lo(?:opback)?\d+|Tu(?:nnel)?\d+|Po(?:rt-channel)?\d+
+      )\b
+    color: f.type-7 bold
+
+  # === PROTOCOLS & SERVICES ===
+  - description: Network protocols
+    regex: (?i)\b(tcp|udp|icmp|esp|ah|gre|eigrp|ospf|bgp|isis|rip|ssh|telnet|https?|ftp|tftp|snmp|ntp|dns|dhcp|sip|ipsec|mpls|vrrp|hsrp|lacp|lldp|cdp|stp|rstp)\b
+    color: f.type-9
+
+  - description: Port numbers with context
+    regex: \b(?:port\s+)?([0-9]{1,5})/(tcp|udp)\b|\b(port\s+)([0-9]{1,5})\b
+    color: f.type-8
+
+  # === SECURITY TERMS ===
+  - description: Permit/Allow actions
+    regex: (?i)\b(permit(ted)?|allow(ed)?|accept(ed)?|pass(ed)?|trust(ed)?|establish(ed)?)\b
+    color: f.status-7 bold
+
+  - description: Deny/Block actions
+    regex: (?i)\b(den(y|ied|ies)|drop(ped)?|reject(ed)?|block(ed)?|untrust(ed)?|discard(ed)?)\b
+    color: f.status-1 bold underline
+
+  - description: Security zones/common zone names
+    regex: (?i)\b(trust|untrust|dmz|wan|lan|mgmt|internet|internal|external|inside|outside|global)(?=\s|$|\-zone)
+    color: f.type-6 underline
+
+  - description: Any/All keywords (broad/unsafe)
+    regex: (?i)\b(any|all|0\.0\.0\.0/0|::/0|any-source|any-destination)\b
+    color: f.status-3 bold
+
+  # === JUNOS & CISCO STATE RULES (MULTI-GROUP, FIXED) ===
+  - description: Junos Physical link status (flexible)
+    regex: (?i)Physical(?:\s+\S+){0,3}\s+link is\s+(?:(Up)|(Down))
+    color:
+      1: f.status-7 bold   # Up  -> OK
+      2: f.status-1 bold  
+
+  - description: Cisco interface admin-state
+    regex: (?m)^\s\s(?:(no shutdown)|(shutdown))\s*$
+    color:
+      1: f.status-7 bold        # no shutdown -> OK
+      2: f.status-1 bold        # shutdown    -> Critical
+
+  - description: Route-map permit/deny
+    regex: (?i)\b(?:(permit)|(deny))\b
+    color:
+      1: f.status-7 bold underline  # permit -> make it pop on green/black
+      2: f.status-1 bold            # deny
+
+  - description: Interface status line
+    regex: ^Ethernet[0-9]+ is (?:(up)|(down))
+    color:
+      1: f.status-7 bold
+      2: f.status-1 bold
+
+  - description: Line protocol state
+    regex: (?i)\bline protocol is (?:(up)|(down)|(lowerlayer.*))\b
+    color:
+      1: f.status-7 bold
+      2: f.status-1 bold
+      3: f.status-1 bold
+
+  - description: Up/Down timestamps (Cisco int detail)
+    regex: ^\s\s(?:(Up)|(Down))\s.*$
+    color:
+      1: f.status-7 bold
+      2: f.status-1 bold
+
+  # === HIGH-LEVEL OBJECTS & MISC ===
+  - description: ACLs/Policies/Classes
+    regex: (?i)\b(object(-group)?|access-list|acl|policy(-map)?|class(-map)?|service(-policy)?|nat|rule|filter)\s+[\w\-]+
+    color: f.type-4 bold
+
+  - description: VLAN/VRF/vsys/context labels
+    regex: (?i)\b(vlan|vrf|vdom|vsys|context)\s+[\w\-]+
+    color: f.type-6
+
+  - description: Capitalised variables/objects (3+ chars)
+    regex: \b[A-Z0-9_]{3,}\b
+    color: f.type-8 bold
+
+  - description: Numbers (process last)
+    regex: \b(?<!\.)\d+(\.\d+)?(?!\.)\b
+    color: f.type-1
